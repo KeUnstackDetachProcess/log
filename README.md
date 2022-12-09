@@ -17,8 +17,8 @@ func main() {
   
 	log.Ok("Simple example using *colored* format")
 	log.Info("Just an *information* log, *2* + *2* = *%d*", 2+2)
-  log.Warn("Here's a warning...")
-  log.Err("And here we have an *error*, error log also uses *os.Exit(1)*")
+	log.Warn("Here's a warning...")
+	log.Err("And here we have an *error*, error log also uses *os.Exit(1)*")
 }
 
 ```
