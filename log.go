@@ -5,12 +5,17 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"sync"
 	"time"
 
 	"github.com/fatih/color"
 )
 
-var formatRegex = regexp.MustCompile(`\*+([^\r\n*]+)\*+`)
+var (
+	formatRegex = regexp.MustCompile(`\*+([^\r\n*]+)\*+`)
+
+	mu sync.Mutex // Mutex for synchronization
+)
 
 func printFormattedMessage(color *color.Color, message string, args ...any) {
 
@@ -46,23 +51,35 @@ func getCurrentTime() string {
 }
 
 func Ok(message string, args ...any) {
-	tagColor.Printf("[%s] ", tag)
-	printFormattedMessage(g, fmt.Sprintf("[%s] *OKAY* %s\n", getCurrentTime(), message), args...)
+	mu.Lock()         // Lock the mutex
+	defer mu.Unlock() // Unlock the mutex when function returns
+
+	tagColor.Printf("[%s]", tag)
+	printFormattedMessage(g, fmt.Sprintf(" [%s] *OKAY* %s\n", getCurrentTime(), message), args...)
 }
 
 func Info(message string, args ...any) {
-	tagColor.Printf("[%s] ", tag)
-	printFormattedMessage(c, fmt.Sprintf("[%s] *INFO* %s\n", getCurrentTime(), message), args...)
+	mu.Lock()
+	defer mu.Unlock()
+
+	tagColor.Printf("[%s]", tag)
+	printFormattedMessage(c, fmt.Sprintf(" [%s] *INFO* %s\n", getCurrentTime(), message), args...)
 }
 
 func Warn(message string, args ...any) {
-	tagColor.Printf("[%s] ", tag)
-	printFormattedMessage(y, fmt.Sprintf("[%s] *WARN* %s\n", getCurrentTime(), message), args...)
+	mu.Lock()
+	defer mu.Unlock()
+
+	tagColor.Printf("[%s]", tag)
+	printFormattedMessage(y, fmt.Sprintf(" [%s] *WARN* %s\n", getCurrentTime(), message), args...)
 }
 
 func Err(message string, args ...any) {
-	tagColor.Printf("[%s] ", tag)
-	printFormattedMessage(r, fmt.Sprintf("[%s] *ERR** %s\n", getCurrentTime(), message), args...)
+	mu.Lock()
+	defer mu.Unlock()
+
+	tagColor.Printf("[%s]", tag)
+	printFormattedMessage(r, fmt.Sprintf(" [%s] *ERR** %s\n", getCurrentTime(), message), args...)
 	os.Exit(1)
 }
 
